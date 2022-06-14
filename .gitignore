@@ -1,3 +1,6 @@
+# Ignore data files.
+**/data/**/*.csv
+
 # Dev environment stuff
 .idea/
 

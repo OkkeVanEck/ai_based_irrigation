@@ -23,7 +23,7 @@ def get_tutiempo_table(year, month, debug=False):
         try:
             page = urllib.request.urlopen(url)
         except HTTPError as e:
-            print(f"[{year}-{month}]\tNo data available..  ({e.code})")
+            print(f"\t[{year}-{month}]\tNo data available..  ({e.code})")
             return
 
         soup = BeautifulSoup(page.read(), "html.parser")
@@ -57,6 +57,8 @@ def get_tutiempo(years):
     Download the Tutiempo dataset for the given years through a web scraper.
     """
     for year in years:
+        print(f"\nStarting on year {year}..")
+
         # Create folder for the current years results.
         os.makedirs(Path(f"tutiempo/{year}"), exist_ok=True)
 
