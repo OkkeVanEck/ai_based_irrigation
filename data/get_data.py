@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import pandas as pd
 from bs4 import BeautifulSoup
 import urllib.request
@@ -6,15 +7,12 @@ from pathlib import Path
 import os
 
 
-def get_tutiempo_table(year, month, debug=False):
+def _get_tutiempo_table(year, month, debug=False):
     """
     Fetch the webpage of the specified year and month, and scrape the data.
     """
     # Get HTML code.
     if debug:
-        year = "2022"
-        month = "01"
-
         with open(Path("tutiempo_debug/weather_01-2022.html"), "r") as fp:
             soup = BeautifulSoup(fp, "html.parser")
     else:
@@ -47,9 +45,13 @@ def get_tutiempo_table(year, month, debug=False):
     # Replace '-' with an empty string, as it is missing data.
     df = pd.DataFrame(data=data, columns=headers)
     df = df.replace({"\xa0": "", "-": ""}, regex=True)
+    df = df.set_index("Day")
 
-    # Store DataFrame as a CSV.
-    df.to_csv(Path(f"tutiempo/{year}/{month}.csv"))
+    # Store DataFrame as a CSV, when not debugging, print DataFrame otherwise.
+    if not debug:
+        df.to_csv(Path(f"raw/tutiempo/{year}/{month}.csv"))
+    else:
+        print(df)
 
 
 def get_tutiempo(years):
@@ -57,7 +59,7 @@ def get_tutiempo(years):
     Download the Tutiempo dataset for the given years through a web scraper.
     """
     for year in years:
-        print(f"\nStarting on year {year}..")
+        print(f"\nProcessing year {year}..")
 
         # Create folder for the current years results.
         os.makedirs(Path(f"tutiempo/{year}"), exist_ok=True)
@@ -65,7 +67,7 @@ def get_tutiempo(years):
         # Fill year folder with data from all months.
         for month in ["01", "02", "03", "04", "05", "06", "07", "08", "09",
                       "10", "11", "12"]:
-            get_tutiempo_table(year, month)
+            _get_tutiempo_table(year, month)
 
 
 if __name__ == "__main__":
