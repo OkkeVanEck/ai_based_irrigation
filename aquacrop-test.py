@@ -7,9 +7,11 @@ from aquacrop.utils import prepare_weather, get_filepath
 from scipy.optimize import minimize
 
 
+# TODO: use actual climate from Tamale
 weather_file_path = get_filepath('champion_climate.txt')
 
 
+# TODO: Use days instead of weeks for the simulation. Days now take to long if done for a whole week
 def create_pandas_irrigation_schedule(sim_start, sim_end):
     """This function create an irrigation schedule"""
     all_days = pd.date_range(sim_start, sim_end)  # list of all dates in simulation period
@@ -41,6 +43,7 @@ def objective(x, dates, eps, sign=-1.):
 
     irrigate_schedule = IrrigationManagement(irrigation_method=3, Schedule=schedule)
 
+    # TODO: define crop stage (emergence, anthesis, max rooting depth, canopy senescence, maturity)
     model_os = AquaCropModel(
         sim_start_time=SIM_START,
         sim_end_time=SIM_END,
@@ -57,20 +60,26 @@ def objective(x, dates, eps, sign=-1.):
 
 
 def max_water_constraint(x):
+    # Constraints are normalized to (inequality) MAX_WATER_MM - sum(x) >= 0
     return MAX_WATER_MM - sum(x)
 
 
+# TODO: use actual input from user
 SIM_START = "1982/05/01"
 SIM_END = "1983/06/01"  # Run the simulation for a year (assuming crop can be harvested within one year, otherwise it should run longer)
 SOIL_TYPE = Soil(soil_type='SandyLoam')
 CROP = Crop('Maize', planting_date='05/01')
 
+
+# TODO: use multi-start to run multiple simulations with different starting schedules
 for eps in [1e-4, 1e-3, 1e-2, 1e-1]:
     MAX_WATER_MM = 250 * eps
 
     irrigation_schedule = create_pandas_irrigation_schedule(SIM_START, SIM_END)
 
     n = len(irrigation_schedule)
+
+    # TODO: create better initialized starting irrigation schedule
     x0 = np.random.dirichlet(np.ones(n), size=1)[0] * MAX_WATER_MM  # Random starting point using max amount of water
 
     solution = minimize(objective, x0, (irrigation_schedule, eps),
@@ -85,3 +94,5 @@ for eps in [1e-4, 1e-3, 1e-2, 1e-1]:
 
     print(f"\nBest irrigation schedule (eps {eps}):\n"
           f"{best_irr_schedule.to_string()}\n")
+
+    # TODO: return useful output
