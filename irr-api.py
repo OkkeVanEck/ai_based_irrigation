@@ -3,7 +3,7 @@ import uuid
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from database import init_database, Session, Simulation,\
-    get_all_simulations, create_simulation
+    get_all_simulations, get_simulation, create_simulation
 
 app = Flask(__name__)
 CORS(app)
@@ -13,7 +13,14 @@ CORS(app)
 def get_simulations():
     with Session() as session:
         sims = get_all_simulations(session, request.remote_addr)
-        return jsonify(sims)
+        return jsonify([s.to_dict() for s in sims])
+
+
+@app.route("/get-simulation/<uid>")
+def get_simulation_by_id(uid):
+    with Session() as session:
+        sim = get_simulation(session, uid)
+        return jsonify(sim.to_dict())
 
 
 @app.route("/create-simulation", methods=['POST'])

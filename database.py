@@ -27,8 +27,7 @@ class Simulation(Base):
     max_water = Column(Integer, nullable=False)
     field_size = Column(Integer, nullable=False)
 
-    @property
-    def serialize(self):
+    def to_dict(self):
         return {
             'id': self.id,
             'mac_address': self.mac_address,
@@ -63,11 +62,11 @@ def create_simulation(session, sim: Simulation):
 
         session.add(existing_sim)
         session.commit()
-        return "Featured result updated."
+        return sim.id
     else:
         session.add(sim)
         session.commit()
-        return "Added featured result."
+        return sim.id
 
 
 def get_all_simulations(session, mac_address):
