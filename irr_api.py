@@ -1,9 +1,11 @@
 import uuid
+from http.client import BAD_REQUEST
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from database import init_database, Session, Simulation,\
     get_all_simulations, get_simulation, create_simulation
+from irr_simulations import find_best_schedule
 
 app = Flask(__name__)
 CORS(app)
@@ -25,15 +27,21 @@ def get_simulation_by_id(uid):
 
 @app.route("/create-simulation", methods=['POST'])
 def create_update_simulation():
-    sim = Simulation(id=str(uuid.uuid4()), mac_address=request.remote_addr, **request.json)
+    try:
+        ip = request.remote_addr
+        start_date = request.json['start_date']
+        end_date = request.json['end_date']
+        crop_type = request.json['crop_type']
+        crop_stage = request.json['crop_stage']
+        field_size = request.json['field_size']
+        max_water = request.json['max_water']
+    except Exception as e:
+        return BAD_REQUEST
 
-    # ip = request.remote_addr
-    # crop_type = request.form.get('crop_type')
-    # crop_stage = request.form.get('crop_stage')
-    # start_date = request.form.get('start_date')
-    # end_date = request.form.get('end_date')
-    # max_water = request.form.get('max_water')
-    # field_size = request.form.get('field_size')
+    opt_schedule, harvest_date = find_best_schedule(start=start_date, end=end_date, crop=crop_type,
+                                                    field_size=int(field_size), max_irr_liters=int(max_water))
+    sim = Simulation(id=str(uuid.uuid4()), mac_address=ip, schedule=opt_schedule.Liters.to_dict(),
+                     harvest_date=harvest_date, **request.json)
 
     with Session() as session:
         return jsonify(create_simulation(session, sim))

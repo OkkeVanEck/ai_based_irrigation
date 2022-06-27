@@ -22,25 +22,50 @@ export default {
         await axios.get(`http://localhost:5555/get-simulation/${this.$route.params.uid}`)
             .then(res => {
                 this.simulation = res.data;
-                this.calendar_from_date = new Date(this.simulation.start_date)
-
-                this.attributes = [{
-                    key: 0,
-                    highlight: true,
-                    dot: false,
-                    bar: false,
-                    content: 'blue',
-                    popover: {
-                        label: '4 Liters',
-                    },
-                    // customData: {...},
-                    dates: new Date(2021, 9,21),
-                    excludeDates: null,
-                    order: 0
-                }];
-
                 console.log(this.simulation);
-            })
+
+                this.calendar_from_date = new Date(this.simulation.start_date);
+
+                this.attributes = [];
+
+                // Add watering dates to calendar
+                Object.entries(this.simulation.schedule).forEach(([date, liters]) => {
+                    if (liters > 0) {
+                        this.attributes.push({
+                            key: 0,
+                            highlight: true,
+                            dot: false,
+                            bar: false,
+                            content: 'blue',
+                            popover: {
+                                label: `${liters} Liters`,
+                            },
+                            // customData: {...},
+                            dates: Date.parse(date),
+                            excludeDates: null,
+                            order: 0
+                        });
+                    }
+                });
+
+                // Add harvest date to calendar
+                if (this.simulation.harvest_date !== 'undefined') {
+                    this.attributes.push({
+                        key: 0,
+                        highlight: true,
+                        dot: false,
+                        bar: false,
+                        content: 'blue',
+                        popover: {
+                            label: `Expected optimal harvest date`,
+                        },
+                        // customData: {...},
+                        dates: new Date(this.simulation.harvest_date),
+                        excludeDates: null,
+                        order: 0
+                    });
+                }
+            });
     },
     computed: {
         layout() {

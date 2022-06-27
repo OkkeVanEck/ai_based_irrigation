@@ -15,3 +15,4 @@ SQLAlchemy~=1.4.37
 psycopg2
 flask
 flask-cors
+matplotlib

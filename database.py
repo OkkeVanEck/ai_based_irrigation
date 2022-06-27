@@ -1,5 +1,9 @@
+import json
 import os
-from sqlalchemy import create_engine, Column, String, DateTime, Integer
+import zlib
+
+from sqlalchemy import create_engine, Column, String, DateTime, Integer, ForeignKey, TypeDecorator, LargeBinary
+from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import sessionmaker, declarative_base
 from urllib.parse import quote_plus
 
@@ -14,6 +18,20 @@ engine = create_engine(f"postgresql://{POSTGRES_USERNAME}:{quote_plus(POSTGRES_P
 Session = sessionmaker(bind=engine)
 
 
+class CustomLargeBinary(TypeDecorator):
+    """We need this class to decode and encode the dictionaries to bytes"""
+    impl = LargeBinary
+
+    def process_bind_param(self, value, dialect):
+        return zlib.compress(json.dumps(value).encode('utf-8'))
+
+    def process_result_value(self, value, dialect):
+        return json.loads(zlib.decompress(value).decode('utf-8'))
+
+    def coerce_compared_value(self, op, value):
+        return self.impl.coerce_compared_value(op, value)
+
+
 class Simulation(Base):
     """ORM class for the featured results"""
     __tablename__ = 'simulations'
@@ -26,6 +44,8 @@ class Simulation(Base):
     end_date = Column(DateTime, nullable=False)
     max_water = Column(Integer, nullable=False)
     field_size = Column(Integer, nullable=False)
+    schedule = Column(MutableDict.as_mutable(CustomLargeBinary), nullable=True)
+    harvest_date = Column(DateTime, nullable=True)
 
     def to_dict(self):
         return {
@@ -36,7 +56,9 @@ class Simulation(Base):
             'start_date': self.start_date,
             'end_date': self.end_date,
             'max_water': self.max_water,
-            'field_size': self.field_size
+            'field_size': self.field_size,
+            'schedule': self.schedule,
+            'harvest_date': self.harvest_date
         }
 
 
@@ -59,6 +81,8 @@ def create_simulation(session, sim: Simulation):
         setattr(existing_sim, 'end_date', sim.end_date)
         setattr(existing_sim, 'max_water', sim.max_water)
         setattr(existing_sim, 'field_size', sim.field_size)
+        setattr(existing_sim, 'schedule', sim.schedule)
+        setattr(existing_sim, 'harvest_date', sim.harvest_date)
 
         session.add(existing_sim)
         session.commit()

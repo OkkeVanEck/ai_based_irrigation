@@ -9,7 +9,7 @@
                 <label class="form-label" for="crop">Crop type</label>
                 <div class="d-block row button-carousel overflow-scroll text-nowrap">
                     <div class="d-inline-block col-3 text-center" v-for="(crop, i) in crops" :key="i">
-                        <input type="radio" class="btn-check" name="options" :id="crop"
+                        <input type="radio" class="btn-check" name="crop type" :id="crop"
                                v-model="crop_type" :value="crop" autocomplete="off">
                         <label class="btn btn-success" :for="crop">
                             <img :src="require(`../assets/${crop}.svg`)" :alt="crop" class="m-2" width="30"/>
@@ -22,7 +22,7 @@
                 <label class="form-label" for="crop">Crop stage</label>
                 <div class="d-block row button-carousel overflow-scroll text-nowrap">
                     <div class="d-inline-block col-3" v-for="(stage, i) in stages" :key="i">
-                        <input type="radio" class="btn-check" name="options" :id="stage"
+                        <input type="radio" class="btn-check" name="crop stage" :id="stage"
                                v-model="crop_stage" :value="i" autocomplete="off">
                         <label class="btn btn-success" :for="stage">
                             <img :src="require(`../assets/crop stages/${stage}.svg`)" :alt="stage" class="m2" width="45"/>
@@ -73,7 +73,7 @@ export default {
     name: 'NewSimulationForm',
     data() {
         return {
-            crops: ['maize', 'tomato', 'pepper'],
+            crops: ['Maize', 'Tomato', 'DryBean'],
             stages: ['emergence', 'anthesis', 'max rooting depth', 'canopy senescence'],
             crop_type: null,
             crop_stage: null,
@@ -93,10 +93,10 @@ export default {
                 max_water: this.max_water,
                 field_size: this.field_size
             })
-                .then(res => {
-                    console.log(res)
-                    this.$router.push({name: 'Irrigation schedule', params: {uid: res.data}})
-                })
+            .then(res => {
+                console.log(res)
+                this.$router.push({name: 'Irrigation schedule', params: {uid: res.data}})
+            })
         }
     }
 }
