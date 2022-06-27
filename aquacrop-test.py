@@ -105,7 +105,7 @@ if __name__ == "__main__":
         yld, tirr = objective(schedule.Depth.values, schedule, SIM_START, SIM_END, max_irr_season,
                               evaluate=True, verbose=True)
         yld_list.append(yld)
-        total_irr_list.append(tirr)
+        total_irr_list.append(max_irr_season)
 
     fig, ax = plt.subplots(1, 1, figsize=(13, 8))
 
@@ -120,6 +120,8 @@ if __name__ == "__main__":
     ax.set_ylim([2, 15.5])
 
     plt.show()
+
+    water_yield = (np.array(yld_list) + np.array(total_irr_list)) / 2
 
     a = 1
 
