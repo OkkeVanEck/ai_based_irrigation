@@ -1,3 +1,5 @@
+<!--TODO: SCHEDULE FOR WATERING ALL KNOWN SIMULATIONS FOR THIS USER ON FRONT PAGE-->
+
 <template>
     <h1>Irrigation</h1>
     <div class="container">
@@ -10,7 +12,8 @@
             </div>
             <div class="col-3" v-for="(sim, i) in simulations" :key="i">
                 <button type="button" class="form-control btn btn-primary" @click="openSimulation(sim.id)">
-                    {{ sim.crop_type }}
+                    <img :src="require(`../assets/${sim.crop_type}.svg`)" :alt="sim.crop_type"
+                         class="m-2" width="30" />
                 </button>
             </div>
         </div>

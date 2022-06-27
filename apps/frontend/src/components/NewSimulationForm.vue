@@ -3,26 +3,39 @@
 
     <h1>New simulation</h1>
 
-    <div class="container">
+    <div class="container-fluid">
         <form class="text-start">
             <div class="mb-3">
                 <label class="form-label" for="crop">Crop type</label>
-                <select aria-label="Crop type" class="form-select" v-model="crop_type">
-                    <option value="maize">Maize</option>
-                    <option value="tomato">Tomato</option>
-                    <option value="pepper">Pepper</option>
-                </select>
+                <div class="d-block row button-carousel overflow-scroll text-nowrap">
+                    <div class="d-inline-block col-3 text-center" v-for="(crop, i) in crops" :key="i">
+                        <input type="radio" class="btn-check" name="options" :id="crop"
+                               v-model="crop_type" :value="crop" autocomplete="off">
+                        <label class="btn btn-success" :for="crop">
+                            <img :src="require(`../assets/${crop}.svg`)" :alt="crop" class="m-2" width="30"/>
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label" for="crop">Crop stage</label>
-                <select aria-label="Current crop stage" class="form-select" v-model="crop_stage">
-                    <option value="0">Emergence</option>
-                    <option value="1">Anthesis</option>
-                    <option value="2">Max. rooting depth</option>
-                    <option value="3">Canopy senescence</option>
-                    <option value="4">Maturity</option>
-                </select>
+                <div class="d-block row button-carousel overflow-scroll text-nowrap">
+                    <div class="d-inline-block col-3" v-for="(stage, i) in stages" :key="i">
+                        <input type="radio" class="btn-check" name="options" :id="stage"
+                               v-model="crop_stage" :value="i" autocomplete="off">
+                        <label class="btn btn-success" :for="stage">
+                            <img :src="require(`../assets/crop stages/${stage}.svg`)" :alt="stage" class="m2" width="45"/>
+                        </label>
+                    </div>
+                </div>
+                <!--                <select aria-label="Current crop stage" class="form-select" v-model="crop_stage">-->
+                <!--                    <option value="0">Emergence</option>-->
+                <!--                    <option value="1">Anthesis</option>-->
+                <!--                    <option value="2">Max. rooting depth</option>-->
+                <!--                    <option value="3">Canopy senescence</option>-->
+                <!--                    <option value="4">Maturity</option>-->
+                <!--                </select>-->
             </div>
 
             <div class="mb-3">
@@ -43,7 +56,8 @@
 
             <label for="fieldSize" class="form-label">Field size</label>
             <div class="input-group mb-3">
-                <input type="number" class="form-control" id="fieldSize" aria-describedby="fieldSize" v-model="field_size">
+                <input type="number" class="form-control" id="fieldSize" aria-describedby="fieldSize"
+                       v-model="field_size">
                 <span class="input-group-text" id="size-addon">m<sup>2</sup></span>
             </div>
 
@@ -59,6 +73,8 @@ export default {
     name: 'NewSimulationForm',
     data() {
         return {
+            crops: ['maize', 'tomato', 'pepper'],
+            stages: ['emergence', 'anthesis', 'max rooting depth', 'canopy senescence'],
             crop_type: null,
             crop_stage: null,
             start_date: new Date(),
@@ -77,11 +93,30 @@ export default {
                 max_water: this.max_water,
                 field_size: this.field_size
             })
-            .then(res => {
-                console.log(res)
-                this.$router.push({ name: 'Irrigation schedule', params: { uid: res.data } })
-            })
+                .then(res => {
+                    console.log(res)
+                    this.$router.push({name: 'Irrigation schedule', params: {uid: res.data}})
+                })
         }
     }
 }
 </script>
+
+<style>
+.btn-check:checked + label > img {
+    transform: scale(1.25);
+    opacity: 0.3;
+    border: none;
+}
+
+.col-3 img {
+    cursor: pointer;
+    transition: transform 1s;
+    object-fit: cover;
+}
+
+.col-3 label {
+    overflow: hidden;
+    position: relative;
+}
+</style>
