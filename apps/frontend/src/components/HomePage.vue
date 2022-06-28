@@ -1,7 +1,7 @@
 <!--TODO: SCHEDULE FOR WATERING ALL KNOWN SIMULATIONS FOR THIS USER ON FRONT PAGE-->
 
 <template>
-    <h1>Irrigation</h1>
+    <h1>Irrigation Optimization</h1>
     <div class="container">
         <div class="row row-cols-lg-auto g-3">
             <div class="col-12">

@@ -2,7 +2,7 @@ import json
 import os
 import zlib
 
-from sqlalchemy import create_engine, Column, String, DateTime, Integer, ForeignKey, TypeDecorator, LargeBinary
+from sqlalchemy import create_engine, Column, String, DateTime, Integer, TypeDecorator, LargeBinary
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import sessionmaker, declarative_base
 from urllib.parse import quote_plus

@@ -10,13 +10,10 @@ from aquacrop import AquaCropModel, Soil, Crop, InitialWaterContent, IrrigationM
 from aquacrop.utils import get_filepath, prepare_weather
 from matplotlib import pyplot as plt
 
-weather_file_path = get_filepath('champion_climate.txt')
-weather_df2 = prepare_weather(weather_file_path)
-
 weather_df = pd.read_csv('./data/tamale_weather.csv', parse_dates=['Date'])[['MinTemp', 'MaxTemp', 'Precipitation', 'ReferenceET', 'Date']]
 
 
-def create_initial_irr_schedule(start_date: datetime, end_date: datetime, max_irr: int, irrs_per_month: int = 16):
+def create_initial_irr_schedule(start_date: datetime, end_date: datetime, max_irr: int, irrs_per_month: int = 4):
     """
         Create randomized starting schedule based on irrigating a maximum of twice a week
     """
@@ -36,7 +33,7 @@ def create_initial_irr_schedule(start_date: datetime, end_date: datetime, max_ir
     return schedule
 
 
-def objective(x: np.ndarray, schedule: pd.DataFrame, start_date: datetime, crop: str, soil: str,
+def objective(x: np.ndarray, schedule: pd.DataFrame, start_date: datetime, end_date: datetime, crop: str, soil: str,
               max_irr_season: int, evaluate: bool = False, verbose: bool = False):
     schedule.Depth = x.astype(int)  # Update the initial/start irrigation schedule with the model optimization step
 
@@ -45,11 +42,11 @@ def objective(x: np.ndarray, schedule: pd.DataFrame, start_date: datetime, crop:
     # TODO: define crop stage (emergence, anthesis, max rooting depth, canopy senescence, maturity)
     model = AquaCropModel(
         sim_start_time=start_date.strftime('%Y/%m/%d'),
-        sim_end_time=(start_date + timedelta(days=400)).strftime('%Y/%m/%d'),  # sim should run at least for a year
+        sim_end_time=(start_date + timedelta(days=367)).strftime('%Y/%m/%d'),  # sim should run at least for a year
         weather_df=weather_df,
         soil=Soil(soil_type=soil),
         crop=Crop(crop, planting_date=start_date.strftime('%m/%d')),
-        initial_water_content=InitialWaterContent(wc_type='Pct', value=[0]),
+        initial_water_content=InitialWaterContent(wc_type='Pct', value=[50]),
         irrigation_management=irrigate_schedule,
     )
 
@@ -69,7 +66,7 @@ def objective(x: np.ndarray, schedule: pd.DataFrame, start_date: datetime, crop:
 
 
 def optimize(start_date: datetime, end_date: datetime, crop: str, soil: str,
-             max_irr_season: int, num_searches: int = 1):
+             max_irr_season: int, num_searches: int = 100):
     schedules = []
     yields = []
     for i in range(num_searches):
@@ -77,7 +74,7 @@ def optimize(start_date: datetime, end_date: datetime, crop: str, soil: str,
         schedules.append(irrigation_schedule)
 
         yld = objective(irrigation_schedule.Depth.values, irrigation_schedule,
-                        start_date, crop, soil, max_irr_season)
+                        start_date, end_date, crop, soil, max_irr_season)
         yields.append(yld)
 
     # Save best schedule
@@ -119,7 +116,7 @@ def find_best_schedule(start: str, end: str, crop: str, soil: str = 'SandyLoam',
     total_irr_list = []
     harvest_list = []
     for schedule, max_irr_season in zip(results, max_irrs):
-        yld, tirr, harvest_date = objective(schedule.Depth.values, schedule, start_date, crop, soil,
+        yld, tirr, harvest_date = objective(schedule.Depth.values, schedule, start_date, end_date, crop, soil,
                                             max_irr_season, evaluate=True, verbose=True)
         yld_list.append(yld)
         total_irr_list.append(max_irr_season)
@@ -156,8 +153,8 @@ def find_best_schedule(start: str, end: str, crop: str, soil: str = 'SandyLoam',
 
 if __name__ == "__main__":
     # Run the simulation for a year (assuming crop can be harvested within one year, otherwise it should run longer)
-    SIM_START = "2019/05/01"
-    SIM_END = "2019/12/12"
+    SIM_START = "2021/06/01"
+    SIM_END = "2021/12/31"
     CROP = 'Potato'
 
-    find_best_schedule(SIM_START, SIM_END, CROP, max_irr_liters=10000, verbose=True)
+    find_best_schedule(SIM_START, SIM_END, CROP, max_irr_liters=500, verbose=True)

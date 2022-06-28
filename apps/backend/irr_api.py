@@ -7,6 +7,7 @@ from database import init_database, Session, Simulation,\
     get_all_simulations, get_simulation, create_simulation
 from irr_simulations import find_best_schedule
 from aquacrop.entities.crops.crop_params import crop_params
+from sys import platform
 
 app = Flask(__name__)
 CORS(app)
@@ -53,6 +54,6 @@ def create_update_simulation():
         return jsonify(create_simulation(session, sim))
 
 
-if __name__ == '__main__':
+if platform != 'win32' or __name__ == "__main__":
     init_database()
     app.run(port=5555)
