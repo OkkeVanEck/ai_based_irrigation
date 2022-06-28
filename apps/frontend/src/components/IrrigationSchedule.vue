@@ -1,8 +1,11 @@
 <template>
-    <a type="button" class="btn-link" @click="this.$router.push({ name: 'Create simulation' })">Settings</a> |
+    <a type="button" class="btn-link" @click="this.$router.push({name: 'Create simulation', params: {uid: this.simulation.id}})">
+        Settings
+    </a> |
     <a type="button" class="btn-link" @click="this.$router.push({ name: 'Home' })">Home</a>
 
     <h1>Irrigation Schedule</h1>
+    <div>{{this.simulation.crop_type}}</div>
 
     <div class="container">
         <Calendar :columns="layout.columns"

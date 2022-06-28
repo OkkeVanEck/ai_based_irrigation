@@ -7,15 +7,16 @@ import dateutil.parser
 import numpy as np
 import pandas as pd
 from aquacrop import AquaCropModel, Soil, Crop, InitialWaterContent, IrrigationManagement
-from aquacrop.utils import prepare_weather, get_filepath
+from aquacrop.utils import get_filepath, prepare_weather
 from matplotlib import pyplot as plt
-from scipy.optimize import fmin_tnc, minimize
 
-# TODO: use actual climate from Tamale
 weather_file_path = get_filepath('champion_climate.txt')
+weather_df2 = prepare_weather(weather_file_path)
+
+weather_df = pd.read_csv('./data/tamale_weather.csv', parse_dates=['Date'])[['MinTemp', 'MaxTemp', 'Precipitation', 'ReferenceET', 'Date']]
 
 
-def create_initial_irr_schedule(start_date: datetime, end_date: datetime, max_irr: int, irrs_per_month: int = 4):
+def create_initial_irr_schedule(start_date: datetime, end_date: datetime, max_irr: int, irrs_per_month: int = 16):
     """
         Create randomized starting schedule based on irrigating a maximum of twice a week
     """
@@ -44,8 +45,8 @@ def objective(x: np.ndarray, schedule: pd.DataFrame, start_date: datetime, crop:
     # TODO: define crop stage (emergence, anthesis, max rooting depth, canopy senescence, maturity)
     model = AquaCropModel(
         sim_start_time=start_date.strftime('%Y/%m/%d'),
-        sim_end_time=(start_date + timedelta(days=366)).strftime('%Y/%m/%d'),  # sim should run at least for a year
-        weather_df=prepare_weather(weather_file_path),
+        sim_end_time=(start_date + timedelta(days=400)).strftime('%Y/%m/%d'),  # sim should run at least for a year
+        weather_df=weather_df,
         soil=Soil(soil_type=soil),
         crop=Crop(crop, planting_date=start_date.strftime('%m/%d')),
         initial_water_content=InitialWaterContent(wc_type='Pct', value=[0]),
@@ -56,7 +57,6 @@ def objective(x: np.ndarray, schedule: pd.DataFrame, start_date: datetime, crop:
     results = model.get_simulation_results()
 
     yield_ = results['Yield (tonne/ha)'].mean()
-    # total_irr = schedule.Depth.sum()
     total_irr = results['Seasonal irrigation (mm)'].mean()
 
     if verbose:
@@ -156,8 +156,8 @@ def find_best_schedule(start: str, end: str, crop: str, soil: str = 'SandyLoam',
 
 if __name__ == "__main__":
     # Run the simulation for a year (assuming crop can be harvested within one year, otherwise it should run longer)
-    SIM_START = "1982/05/01"
-    SIM_END = "1983/06/01"
-    CROP = 'Maize'
+    SIM_START = "2019/05/01"
+    SIM_END = "2019/12/12"
+    CROP = 'Potato'
 
-    find_best_schedule(SIM_START, SIM_END, CROP, verbose=True)
+    find_best_schedule(SIM_START, SIM_END, CROP, max_irr_liters=10000, verbose=True)

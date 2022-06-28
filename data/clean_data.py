@@ -11,7 +11,7 @@ def clean_tutiempo():
     os.makedirs(Path(f"cleaned/tutiempo"), exist_ok=True)
 
     # Clean all files.
-    for root, dirs, files in os.walk(Path("raw/tutiempo")):
+    for root, dirs, files in os.walk(Path("tutiempo")):
         # Create cleaned folder and print debug if files will be cleaned.
         if len(files) > 0:
             print(f"\tCleaning {root[4:]}..")

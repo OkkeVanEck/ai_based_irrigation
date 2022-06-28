@@ -1,5 +1,6 @@
 # Ignore data files.
 **/data/**/*.csv
+!**/data/tamale_weather.csv
 
 # Dev environment stuff
 .idea/

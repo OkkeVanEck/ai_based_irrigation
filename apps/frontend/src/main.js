@@ -16,7 +16,7 @@ const routes = [
         component: Home
     },
     {
-        path: '/new',
+        path: '/new/:uid?',
         name: 'Create simulation',
         component: NewSimulationForm
     },
