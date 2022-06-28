@@ -6,6 +6,7 @@ from flask_cors import CORS
 from database import init_database, Session, Simulation,\
     get_all_simulations, get_simulation, create_simulation
 from irr_simulations import find_best_schedule
+from aquacrop.entities.crops.crop_params import crop_params
 
 app = Flask(__name__)
 CORS(app)
@@ -25,6 +26,11 @@ def get_simulation_by_id(uid):
         return jsonify(sim.to_dict())
 
 
+@app.route("/get-crop-harvest/<crop>")
+def get_crop_harvest(crop):
+    return jsonify(int(crop_params[crop]['MaturityCD']))
+
+
 @app.route("/create-simulation", methods=['POST'])
 def create_update_simulation():
     try:
@@ -41,7 +47,7 @@ def create_update_simulation():
     opt_schedule, harvest_date = find_best_schedule(start=start_date, end=end_date, crop=crop_type,
                                                     field_size=int(field_size), max_irr_liters=int(max_water))
     sim = Simulation(id=str(uuid.uuid4()), mac_address=ip, schedule=opt_schedule.Liters.to_dict(),
-                     harvest_date=harvest_date, **request.json)
+                     harvest_date=str(harvest_date), **request.json)
 
     with Session() as session:
         return jsonify(create_simulation(session, sim))

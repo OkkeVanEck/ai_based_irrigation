@@ -1,6 +1,6 @@
 # SET ENVIRONMENT VARIABLE `DEVELOPMENT=1` FOR THE PROGRAMME TO WORK!
 import multiprocessing as mp
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import time
 
 import dateutil.parser
@@ -35,7 +35,7 @@ def create_initial_irr_schedule(start_date: datetime, end_date: datetime, max_ir
     return schedule
 
 
-def objective(x: np.ndarray, schedule: pd.DataFrame, start_date: datetime, end_date: datetime, crop: str, soil: str,
+def objective(x: np.ndarray, schedule: pd.DataFrame, start_date: datetime, crop: str, soil: str,
               max_irr_season: int, evaluate: bool = False, verbose: bool = False):
     schedule.Depth = x.astype(int)  # Update the initial/start irrigation schedule with the model optimization step
 
@@ -44,7 +44,7 @@ def objective(x: np.ndarray, schedule: pd.DataFrame, start_date: datetime, end_d
     # TODO: define crop stage (emergence, anthesis, max rooting depth, canopy senescence, maturity)
     model = AquaCropModel(
         sim_start_time=start_date.strftime('%Y/%m/%d'),
-        sim_end_time=end_date.strftime('%Y/%m/%d'),
+        sim_end_time=(start_date + timedelta(days=366)).strftime('%Y/%m/%d'),  # sim should run at least for a year
         weather_df=prepare_weather(weather_file_path),
         soil=Soil(soil_type=soil),
         crop=Crop(crop, planting_date=start_date.strftime('%m/%d')),
@@ -77,7 +77,7 @@ def optimize(start_date: datetime, end_date: datetime, crop: str, soil: str,
         schedules.append(irrigation_schedule)
 
         yld = objective(irrigation_schedule.Depth.values, irrigation_schedule,
-                        start_date, end_date, crop, soil, max_irr_season)
+                        start_date, crop, soil, max_irr_season)
         yields.append(yld)
 
     # Save best schedule
@@ -119,11 +119,11 @@ def find_best_schedule(start: str, end: str, crop: str, soil: str = 'SandyLoam',
     total_irr_list = []
     harvest_list = []
     for schedule, max_irr_season in zip(results, max_irrs):
-        yld, tirr, harvest_date = objective(schedule.Depth.values, schedule, start_date, end_date, crop, soil,
+        yld, tirr, harvest_date = objective(schedule.Depth.values, schedule, start_date, crop, soil,
                                             max_irr_season, evaluate=True, verbose=True)
         yld_list.append(yld)
         total_irr_list.append(max_irr_season)
-        harvest_list.append(max_irr_season)
+        harvest_list.append(harvest_date)
 
     if verbose:
         fig, ax = plt.subplots(1, 1, figsize=(13, 8))
@@ -142,7 +142,7 @@ def find_best_schedule(start: str, end: str, crop: str, soil: str = 'SandyLoam',
 
     score_list = np.array(total_irr_list) / (np.array(yld_list) ** 2)
     # argmin but score cannot be 0
-    i = np.unravel_index(np.where(score_list!=0, score_list, score_list.max()+1).argmin(), score_list.shape)[0]
+    i = np.unravel_index(np.where(score_list != 0, score_list, score_list.max() + 1).argmin(), score_list.shape)[0]
     opt_solution = results[i].copy()
 
     # Convert raining in mm back to liters over the whole field

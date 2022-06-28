@@ -29,13 +29,6 @@
                         </label>
                     </div>
                 </div>
-                <!--                <select aria-label="Current crop stage" class="form-select" v-model="crop_stage">-->
-                <!--                    <option value="0">Emergence</option>-->
-                <!--                    <option value="1">Anthesis</option>-->
-                <!--                    <option value="2">Max. rooting depth</option>-->
-                <!--                    <option value="3">Canopy senescence</option>-->
-                <!--                    <option value="4">Maturity</option>-->
-                <!--                </select>-->
             </div>
 
             <div class="mb-3">
@@ -44,8 +37,8 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label" for="endDate">End date</label>
-                <input id="endDate" class="form-control" type="date" v-model="end_date">
+                <label class="form-label" for="endDate">Estimated harvest date</label>
+                <input id="endDate" class="form-control" type="date" v-model="end_date" disabled>
             </div>
 
             <label for="maxWater" class="form-label">Maximum water capacity</label>
@@ -68,6 +61,7 @@
 
 <script>
 import axios from 'axios';
+import moment from 'moment';
 
 export default {
     name: 'NewSimulationForm',
@@ -77,7 +71,7 @@ export default {
             stages: ['emergence', 'anthesis', 'max rooting depth', 'canopy senescence'],
             crop_type: null,
             crop_stage: null,
-            start_date: new Date(),
+            start_date: null,
             end_date: null,
             max_water: 0,
             field_size: 0
@@ -88,8 +82,8 @@ export default {
             axios.post('http://localhost:5555/create-simulation', {
                 crop_type: this.crop_type,
                 crop_stage: this.crop_stage,
-                start_date: this.start_date,
-                end_date: this.end_date,
+                start_date: moment(this.start_date).format('YYYY/MM/DD'),
+                end_date: moment(this.end_date).format('YYYY/MM/DD'),
                 max_water: this.max_water,
                 field_size: this.field_size
             })
@@ -97,6 +91,25 @@ export default {
                 console.log(res)
                 this.$router.push({name: 'Irrigation schedule', params: {uid: res.data}})
             })
+        },
+        get_crop_harvest_time() {
+            axios.get(`http://localhost:5555/get-crop-harvest/${this.crop_type}`)
+            .then(res => {
+                console.log(res.data);
+                this.end_date = moment(this.start_date).add(res.data, 'days').toISOString().substring(0, 10);
+            });
+        }
+    },
+    watch: {
+        crop_type: {
+            handler(v) {
+                if (v && this.start_date) this.get_crop_harvest_time();
+            }
+        },
+        start_date: {
+            handler(v) {
+                if (v && this.start_date) this.get_crop_harvest_time();
+            }
         }
     }
 }

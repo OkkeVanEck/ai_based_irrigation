@@ -33,10 +33,9 @@ export default {
                     if (liters > 0) {
                         this.attributes.push({
                             key: 0,
-                            highlight: true,
+                            highlight: 'blue',
                             dot: false,
                             bar: false,
-                            content: 'blue',
                             popover: {
                                 label: `${liters} Liters`,
                             },
@@ -52,10 +51,9 @@ export default {
                 if (this.simulation.harvest_date !== 'undefined') {
                     this.attributes.push({
                         key: 0,
-                        highlight: true,
+                        highlight: 'green',
                         dot: false,
                         bar: false,
-                        content: 'blue',
                         popover: {
                             label: `Expected optimal harvest date`,
                         },
