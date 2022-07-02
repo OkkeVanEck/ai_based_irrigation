@@ -56,4 +56,4 @@ def create_update_simulation():
 
 if platform != 'win32' or __name__ == "__main__":
     init_database()
-    app.run(port=5555)
+    app.run(host='0.0.0.0', port=5555)

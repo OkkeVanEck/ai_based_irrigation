@@ -4,6 +4,7 @@ ARG pg_host
 ARG pg_username
 ARG pg_password
 
+ENV DEVELOPMENT=1
 ENV POSTGRES_HOST=$pg_host
 ENV POSTGRES_USERNAME=$pg_username
 ENV POSTGRES_PASSWORD=$pg_password

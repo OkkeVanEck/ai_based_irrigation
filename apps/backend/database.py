@@ -13,7 +13,10 @@ POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD', 'local')
 
 Base = declarative_base()
 
-engine = create_engine(f"postgresql://{POSTGRES_USERNAME}:{quote_plus(POSTGRES_PASSWORD)}@{POSTGRES_HOST}/irr-db")
+print(f"postgresql://{POSTGRES_USERNAME}:{quote_plus(POSTGRES_PASSWORD)}@"
+                       f"{POSTGRES_HOST}/lucas-test?sslmode=require")
+engine = create_engine(f"postgresql://{POSTGRES_USERNAME}:{quote_plus(POSTGRES_PASSWORD)}@"
+                       f"{POSTGRES_HOST}/lucas-test?sslmode=require")
 
 Session = sessionmaker(bind=engine)
 

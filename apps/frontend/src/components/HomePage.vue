@@ -25,7 +25,7 @@ import axios from 'axios';
 
 export default {
     async created() {
-        await axios.get('http://localhost:5555/get-simulations')
+        await axios.get('http://ict4d-irrigation.westeurope.cloudapp.azure.com:5555/get-simulations')
             .then(res => {
                 this.simulations = res.data
                 console.log(this.simulations);

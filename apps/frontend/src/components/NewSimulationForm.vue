@@ -91,7 +91,7 @@ export default {
         this.form = {...defaultForm};
 
         if (this.$route.params.uid) {
-            await axios.get(`http://localhost:5555/get-simulation/${this.$route.params.uid}`)
+            await axios.get(`http://ict4d-irrigation.westeurope.cloudapp.azure.com:5555/get-simulation/${this.$route.params.uid}`)
                 .then(res => {
                     let sim = res.data;
                     this.form.crop_type = sim.crop_type;
@@ -118,7 +118,7 @@ export default {
         create_simulation() {
             this.loadMsg = "Running simulation...";
             this.loading = true;
-            axios.post('http://localhost:5555/create-simulation', {
+            axios.post('http://ict4d-irrigation.westeurope.cloudapp.azure.com:5555/create-simulation', {
                 crop_type: this.form.crop_type,
                 crop_stage: this.form.crop_stage,
                 start_date: moment(this.form.start_date).format('YYYY/MM/DD'),
@@ -138,7 +138,7 @@ export default {
                 })
         },
         get_crop_harvest_time() {
-            axios.get(`http://localhost:5555/get-crop-harvest/${this.form.crop_type}`)
+            axios.get(`http://ict4d-irrigation.westeurope.cloudapp.azure.com:5555/get-crop-harvest/${this.form.crop_type}`)
                 .then(res => {
                     console.log(res.data);
                     this.form.end_date = moment(this.form.start_date).add(res.data, 'days').toISOString().substring(0, 10);

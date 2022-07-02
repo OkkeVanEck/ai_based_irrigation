@@ -22,7 +22,7 @@ import axios from "axios";
 export default {
     name: 'IrrigationSchedule',
     async created() {
-        await axios.get(`http://localhost:5555/get-simulation/${this.$route.params.uid}`)
+        await axios.get(`http://ict4d-irrigation.westeurope.cloudapp.azure.com:5555/get-simulation/${this.$route.params.uid}`)
             .then(res => {
                 this.simulation = res.data;
                 console.log(this.simulation);
